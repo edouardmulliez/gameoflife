@@ -22,13 +22,19 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 X = np.zeros((20,20))
-line = np.ones((1,10))
-pos = (10,5)
-X[pos[0]:pos[0]+line.shape[0],pos[1]:pos[1]+line.shape[1]] = line
-
 X = X.astype(np.bool)
+line = np.ones((1,10))
 
-X[15,2]
+# Add pattern in the middle of X.
+def add_to_grid(X, element):
+    """
+    Add element to grid X (centered)
+    """
+    h,w = X.shape
+    he, we = element.shape
+    X[(h-he)/2:(h+he)/2, (w-we)/2:(w+we)/2] = element
+
+add_to_grid(X, line)
 
 plt.imshow(X)
 
@@ -39,40 +45,12 @@ kernel = np.array([[1,1,1],
                    [1,1,1],
                    [1,1,1]], dtype=np.int8)
 def evolve(X):
+    """
+    Computes one steps of the game of life
+    """
     nbors = convolve2d(X, kernel, mode='same', boundary='fill')
     X = ((nbors == 3) | (X & (nbors == 4)))
     return(X)
-
-for i in range(10):
-    X = evolve(X)
-    plt.imshow(X)
-    plt.show()
-
-
-
-
-fig = plt.figure()
-
-def f(x, y):
-    return np.sin(x) + np.cos(y)
-
-x = np.linspace(0, 2 * np.pi, 120)
-y = np.linspace(0, 2 * np.pi, 100).reshape(-1, 1)
-
-im = plt.imshow(f(x, y), animated=True)
-
-def updatefig(*args):
-    global x, y
-    x += np.pi / 15.
-    y += np.pi / 20.
-    im.set_array(f(x, y))
-    return im,
-
-ani = animation.FuncAnimation(fig, updatefig, frames=np.linspace(1,100,100), blit=True)
-plt.show()
-
-ani.save('basic_animation.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
-
 
 
 fig = plt.figure()
@@ -89,6 +67,27 @@ ani = animation.FuncAnimation(fig, updatefig, frames=np.linspace(1,100,100), bli
 plt.show()
 
 ani.save('life_animation.mp4', fps=5, extra_args=['-vcodec', 'libx264'])
+
+
+
+
+# To do:
+# 1. Insert it in Jupyter Notebook
+# 2. In html page
+# 3. Save some classical patterns and propose it
+# 4. Have an interface where user can click to add points
+
+
+# Idea: create a canvas where we draw the image. Listen for mouse clicks.
+# Optional: possibility to zoom in/out. Start/stop animation. Next button. 
+
+
+acorn = np.array([[0, 1, 1],
+                  [1, 1, 1],
+                  [1, 0, 0]], dtype=np.int)
+
+
+
 
 
 
