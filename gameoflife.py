@@ -21,9 +21,50 @@ from scipy.signal import convolve2d
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-X = np.zeros((20,20))
+X = np.zeros((100,100))
 X = X.astype(np.bool)
-line = np.ones((1,10))
+
+## Classical Patterns
+patterns = dict({
+    'glider': np.array([[0, 1, 0],
+                        [0, 0, 1],
+                        [1, 1, 1]], dtype=np.int),
+    'small_exploder': np.array([[0,1,0],
+                                [1,1,1],
+                                [1,0,1],
+                                [0,1,0]], dtype=np.int),
+    'exploder': np.array([[1,0,1,0,1],
+                          [1,0,0,0,1],
+                          [1,0,0,0,1],
+                          [1,0,0,0,1],
+                          [1,0,1,0,1]], dtype=np.int),
+    'line': np.ones((1,10), dtype=np.int),
+    'spaceship': np.array([[0,1,1,1,1],
+                           [1,0,0,0,1],
+                           [0,0,0,0,1],
+                           [1,0,0,1,0]], dtype=np.int),
+    'tumbler': np.array([[0,1,1,0,1,1,0],
+                         [0,1,1,0,1,1,0],
+                         [0,0,1,0,1,0,0],
+                         [1,0,1,0,1,0,1],
+                         [1,0,1,0,1,0,1],
+                         [1,1,0,0,0,1,1]]),
+    'gun': np.array([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0],
+                     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,0,0],
+                     [1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                     [1,1,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0],
+                     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1],
+                     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0],
+                     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0]], dtype=np.int)
+    })
 
 # Add pattern in the middle of X.
 def add_to_grid(X, element):
@@ -34,13 +75,11 @@ def add_to_grid(X, element):
     he, we = element.shape
     X[(h-he)/2:(h+he)/2, (w-we)/2:(w+we)/2] = element
 
-add_to_grid(X, line)
+add_to_grid(X, patterns['gun'])
 
-plt.imshow(X)
 
 
 # Compute next step of X
-
 kernel = np.array([[1,1,1],
                    [1,1,1],
                    [1,1,1]], dtype=np.int8)
@@ -49,47 +88,31 @@ def evolve(X):
     Computes one steps of the game of life
     """
     nbors = convolve2d(X, kernel, mode='same', boundary='fill')
-    X = ((nbors == 3) | (X & (nbors == 4)))
-    return(X)
-
+    X[:,:] = ((nbors == 3) | (X & (nbors == 4)))
 
 fig = plt.figure()
 im = plt.imshow(np.zeros(X.shape, dtype=np.bool),
                 cmap='gray', vmin=0, vmax=1, animated=True)
 
 def updatefig(i):
-    global X
-    X = evolve(X)
+    evolve(X)
     im.set_array(X)
     return im,
 
 ani = animation.FuncAnimation(fig, updatefig, frames=np.linspace(1,100,100), blit=True)
 plt.show()
 
-ani.save('life_animation.mp4', fps=5, extra_args=['-vcodec', 'libx264'])
+ani.save('life_animation.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
 
 
 
 
 # To do:
-# 1. Insert it in Jupyter Notebook
 # 2. In html page
-# 3. Save some classical patterns and propose it
 # 4. Have an interface where user can click to add points
 
 
 # Idea: create a canvas where we draw the image. Listen for mouse clicks.
 # Optional: possibility to zoom in/out. Start/stop animation. Next button. 
-
-
-acorn = np.array([[0, 1, 1],
-                  [1, 1, 1],
-                  [1, 0, 0]], dtype=np.int)
-
-
-
-
-
-
 
 
