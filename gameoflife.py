@@ -28,7 +28,7 @@ class Golife:
     Class for the implementation of the Game of Life
     """
 
-    GRID_SIZE=(50,50)
+    GRID_SIZE=(300 , 300)
     ## Classical Patterns
     PATTERNS = dict({
         'glider': np.array([[0, 1, 0],
@@ -98,6 +98,7 @@ class Golife:
                 'Incorrect pattern name. Possible names are: ' +
                 ', '.join(Golife.PATTERNS.keys())
             )
+        self.tab[:,:] = False
         self.add_to_grid(Golife.PATTERNS[name])
 
     def next(self):
