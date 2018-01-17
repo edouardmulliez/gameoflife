@@ -14,8 +14,6 @@ import numpy as np
 
 
 ## To do:
-# - Merge start/stop buttons
-# - Solve zoom problems (not centered)
 # - Add grid lines
 
 
@@ -25,48 +23,46 @@ Builder.load_string('''
     orientation: 'vertical'
     MyPaintWidget:
         id: painter
+        size_hint_y: 1
 
     BoxLayout:
+        id: commands
         orientation: 'horizontal'
         Button:
+            id: start
             text: 'Start'
             size_hint_y: None
             height: '48dp'
-            on_press: root.start()
-        Button:
-            text: 'Stop'
-            size_hint_y: None
-            height: '48dp'
-            on_press: root.stop()
+            on_press: root.start_stop_action()
         Button: 
             text: 'Next'
             size_hint_y: None
             height: '48dp'
             on_press: root.next()
-    Slider:
-        id: speed
-        value: 2
-        min: 1
-        max: 10
-        step: 1
-        value_track: True
-        size_hint_y: None
-        height: '48dp'
-        on_value: root.update_speed()
-    Slider:
-        id: zoom
-        value: 1
-        min: 1
-        max: 5
-        step: 1
-        value_track: True
-        size_hint_y: None
-        height: '48dp'
-        on_value: root.refresh()
-    Spinner:
-        id: pattern_select
-        size_hint_y: None
-        height: '48dp'
+        Slider:
+            id: speed
+            value: 2
+            min: 1
+            max: 50
+            step: 2
+            value_track: True
+            size_hint_y: None
+            height: '48dp'
+            on_value: root.update_speed()
+        Slider:
+            id: zoom
+            value: 12
+            min: 2
+            max: 20
+            step: 1
+            value_track: True
+            size_hint_y: None
+            height: '48dp'
+            on_value: root.refresh()
+        Spinner:
+            id: pattern_select
+            size_hint_y: None
+            height: '48dp'
 
 ''')
 
@@ -81,11 +77,17 @@ class MyPaintWidget(Widget):
             # Click in the paint widget
             zoom = root.ids['zoom'].value
             sq_size = (
-                self.size[0]/Golife.GRID_SIZE[1]*zoom,
-                self.size[1]/Golife.GRID_SIZE[0]*zoom)
+                1.0 * self.size[0]/Golife.GRID_SIZE[1]*zoom,
+                1.0 * self.size[1]/Golife.GRID_SIZE[0]*zoom)
             a = (
                 self.pos[0] + self.size[0]/2*(1-zoom),
                 self.pos[1] + self.size[1]/2*(1-zoom))
+            # sq_size = (
+            #     self.size[0]/Golife.GRID_SIZE[1]*zoom,
+            #     self.size[1]/Golife.GRID_SIZE[0]*zoom)
+            # a = (
+            #     self.pos[0] + self.size[0]/2*(1-zoom),
+            #     self.pos[1] + self.size[1]/2*(1-zoom))
             col = int((touch.x - a[0])/sq_size[0])
             row = int((touch.y - a[1])/sq_size[1])
             if (0 <= row < Golife.GRID_SIZE[0] and 0 <= col < Golife.GRID_SIZE[1]):
@@ -99,20 +101,29 @@ class MyPaintWidget(Widget):
         """
         tab should be a numpy array, with 1 representing filled squares.
         """
+        alpha = 0.90# Print smaller squares to show space between squares
         sq_size = (
-            self.size[0]/tab.shape[1]*zoom,
-            self.size[1]/tab.shape[0]*zoom)
+            1.0 * self.size[0]/tab.shape[1]*zoom,
+            1.0 * self.size[1]/tab.shape[0]*zoom)
         a = (
             self.pos[0] + self.size[0]/2*(1-zoom),
             self.pos[1] + self.size[1]/2*(1-zoom))
         row, col = np.nonzero(tab)
         with self.canvas:
             Color(0.757, 0.573, 0.106, mode='rgb')
+            # Rectangle(pos=self.pos, size=self.size)
             for i in range(len(row)):
                 Rectangle(
-                    pos = (a[0]+col[i]*sq_size[0], a[1]+row[i]*sq_size[1]),
-                    size = sq_size
+                    pos = (int(a[0]+col[i]*sq_size[0]), int(a[1]+row[i]*sq_size[1])),
+                    size = (int(alpha*sq_size[0]), int(alpha*sq_size[1]))
                 )
+
+        # print "self.size" + str(self.size)
+        # print "self.pos" + str(self.pos)
+        
+        # print "zoom: " + str(zoom)
+        # print "correct pos: " + str(self.pos[0]+self.size[0]/2)
+        # print "real pos: " + str(a[0]+(tab.shape[1]/2*sq_size[0]))
 
     def clear_canvas(self):
         self.canvas.clear()
@@ -171,12 +182,24 @@ class MyPaintBox(BoxLayout):
             self.start()
 
     def set_pattern(self, spinner, text):
-        print("Let's change the pattern!")
-        print(text)
         self.golife.set_pattern(text)
+        self.refresh()
+
+    def start_stop_action(self):
+        """
+        Deals with the start/stop button
+        """
+        btn = self.ids['start']
+        if (self.event is not None and self.event.is_triggered):
+            self.stop()
+            btn.text = 'Start'
+        else:
+            self.start()
+            btn.text = 'Stop'
 
 
-class MyPaintApp(App):
+
+class GameOfLifeApp(App):
 
     def build(self):
         global root
@@ -185,6 +208,6 @@ class MyPaintApp(App):
 
 
 if __name__ == '__main__':
-    MyPaintApp().run()
+    GameOfLifeApp().run()
 
 

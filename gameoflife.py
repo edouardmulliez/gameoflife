@@ -28,7 +28,7 @@ class Golife:
     Class for the implementation of the Game of Life
     """
 
-    GRID_SIZE=(300 , 300)
+    GRID_SIZE=(500, 500)
     ## Classical Patterns
     PATTERNS = dict({
         'glider': np.array([[0, 1, 0],
@@ -79,7 +79,7 @@ class Golife:
         """
         Add element to tab (centered). element should be a numpy array.
         """
-        h,w = Golife.GRID_SIZE
+        h, w = Golife.GRID_SIZE
         he, we = element.shape
         self.tab[(h-he)/2:(h+he)/2, (w-we)/2:(w+we)/2] = element
 
