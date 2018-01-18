@@ -2,7 +2,7 @@
 
 This is an implementation of **James Conway's Game of Life**. This game consists in following the evolution of a group of cells, which are multiplying, surviving or dying depending on a set of simple mathematical rules. Depending on the initial position of the cells, different patterns can be reached during the game.
 
-The game is implemented here as a kivy Application. You can select a particular pattern among some saved patterns, select the speed and zoom of application. 
+The game is implemented here as a Kivy Application.
 
 ## Rules of the Game of Life
 
@@ -21,5 +21,6 @@ For a space that is *empty*:
 
 ## How to run the Kivy Application on your computer
 
-You'll need Python 2, with Kivy installed.
-The steps to install Kivy, depending on your OS are [here](https://kivy.org/docs/installation/installation.html).
+**Requirements**: You'll need Python 2, with Kivy installed. The steps to install Kivy, depending on your OS are [here](https://kivy.org/docs/installation/installation.html).
+
+**Run the app**: You'll just have to execute the gameoflife-app.py file. In bash, go to the folder containing the application and type `python gameoflife-app.py`.

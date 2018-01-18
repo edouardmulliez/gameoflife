@@ -28,6 +28,7 @@ Builder.load_string('''
     BoxLayout:
         id: commands
         orientation: 'horizontal'
+        height: '48dp'
         Button:
             id: start
             text: 'Start'
@@ -52,7 +53,7 @@ Builder.load_string('''
         Slider:
             id: zoom
             value: 12
-            min: 2
+            min: 3
             max: 20
             step: 1
             value_track: True
@@ -76,20 +77,19 @@ class MyPaintWidget(Widget):
         if self.collide_point(*touch.pos):
             # Click in the paint widget
             zoom = root.ids['zoom'].value
+
+            a = ((zoom-1.0)/(2*zoom), (zoom+1.0)/(2*zoom))
+            idx = [int(i*j) for j in Golife.GRID_SIZE for i in a]
+            # idx = (int(a[0]*tab.shape[0]), int(a[1]*tab.shape[0]),
+            #     int(a[0]*tab.shape[1]), int(a[1]*tab.shape[1]))
             sq_size = (
-                1.0 * self.size[0]/Golife.GRID_SIZE[1]*zoom,
-                1.0 * self.size[1]/Golife.GRID_SIZE[0]*zoom)
+                1.0 * self.size[0]/(idx[3]-idx[2]),
+                1.0 * self.size[1]/(idx[1]-idx[0]))
             a = (
                 self.pos[0] + self.size[0]/2*(1-zoom),
                 self.pos[1] + self.size[1]/2*(1-zoom))
-            # sq_size = (
-            #     self.size[0]/Golife.GRID_SIZE[1]*zoom,
-            #     self.size[1]/Golife.GRID_SIZE[0]*zoom)
-            # a = (
-            #     self.pos[0] + self.size[0]/2*(1-zoom),
-            #     self.pos[1] + self.size[1]/2*(1-zoom))
-            col = int((touch.x - a[0])/sq_size[0])
-            row = int((touch.y - a[1])/sq_size[1])
+            col = int((touch.x - self.pos[0])/sq_size[0]) + idx[2]
+            row = int((touch.y - self.pos[1])/sq_size[1]) + idx[0]
             if (0 <= row < Golife.GRID_SIZE[0] and 0 <= col < Golife.GRID_SIZE[1]):
                 # print(row, col)
                 self.parent.golife.add_point(row, col)
@@ -101,29 +101,46 @@ class MyPaintWidget(Widget):
         """
         tab should be a numpy array, with 1 representing filled squares.
         """
-        alpha = 0.90# Print smaller squares to show space between squares
+        alpha = 1 # Print smaller squares to show space between squares
+
+        # Only consider needed portion of tab (zoom)
+        a = ((zoom-1.0)/(2*zoom), (zoom+1.0)/(2*zoom))
+        tab = tab[int(a[0]*tab.shape[0]):int(a[1]*tab.shape[0]), int(a[0]*tab.shape[1]):int(a[1]*tab.shape[1])]
         sq_size = (
-            1.0 * self.size[0]/tab.shape[1]*zoom,
-            1.0 * self.size[1]/tab.shape[0]*zoom)
-        a = (
-            self.pos[0] + self.size[0]/2*(1-zoom),
-            self.pos[1] + self.size[1]/2*(1-zoom))
+            1.0 * self.size[0]/tab.shape[1],
+            1.0 * self.size[1]/tab.shape[0])
         row, col = np.nonzero(tab)
         with self.canvas:
-            Color(0.757, 0.573, 0.106, mode='rgb')
-            # Rectangle(pos=self.pos, size=self.size)
+            # Background
+            Color(0.69, 0.70, 0.72, mode='rgb') # Grey
+            Rectangle(pos=self.pos, size=self.size)
+
+            # Cells
+            Color(0.757, 0.573, 0.106, mode='rgb') # Orange
             for i in range(len(row)):
                 Rectangle(
-                    pos = (int(a[0]+col[i]*sq_size[0]), int(a[1]+row[i]*sq_size[1])),
+                    pos = (int(self.pos[0]+col[i]*sq_size[0]), int(self.pos[1]+row[i]*sq_size[1])),
                     size = (int(alpha*sq_size[0]), int(alpha*sq_size[1]))
                 )
 
-        # print "self.size" + str(self.size)
-        # print "self.pos" + str(self.pos)
-        
-        # print "zoom: " + str(zoom)
-        # print "correct pos: " + str(self.pos[0]+self.size[0]/2)
-        # print "real pos: " + str(a[0]+(tab.shape[1]/2*sq_size[0]))
+            # Grid
+            Color(0.6,0.6,0.6, mode='rgb') # black
+            for i in range(tab.shape[0]):
+                Line(points = 
+                    [self.pos[0],
+                    int(self.pos[1] + i*sq_size[1]),
+                    self.pos[0] + self.size[0],
+                    int(self.pos[1] + i*sq_size[1])],
+                    width = 1
+                    )
+            for i in range(tab.shape[1]):
+                Line(points = 
+                    [int(self.pos[0] + i*sq_size[0]),
+                    self.pos[1],
+                    int(self.pos[0] + i*sq_size[0]),
+                    self.pos[1] + self.size[1]],
+                    width = 0.5
+                    )
 
     def clear_canvas(self):
         self.canvas.clear()
