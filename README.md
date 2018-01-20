@@ -17,10 +17,13 @@ For a space that is *empty*:
 ## Controls
 
 - You can first select one of the predefined patterns in the drop-down menu or you can draw youself the initial shape by clicking on the screen. You can also click during the animation to add or remove points.
-- The speed and zoom are controlled by two dials.
+- The speed and zoom are controlled by two dedicated dials.
 
 ## How to run the Kivy Application on your computer
 
 **Requirements**: You'll need Python 2, with Kivy installed. The steps to install Kivy, depending on your OS are [here](https://kivy.org/docs/installation/installation.html).
 
 **Run the app**: You'll just have to execute the gameoflife-app.py file. In bash, go to the folder containing the application and type `python gameoflife-app.py`.
+
+Here is a screenshot of the application: 
+![alt text](images/app-screenshot.png "GameOfLife App")

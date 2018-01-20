@@ -13,14 +13,12 @@ from gameoflife import Golife
 import numpy as np
 
 
-## To do:
-# - Add grid lines
-
-
 Builder.load_string('''
 <MyPaintBox>:
     id: box
     orientation: 'vertical'
+    padding: [4,4,4,4]
+    spacing: 4
     MyPaintWidget:
         id: painter
         size_hint_y: 1
@@ -28,6 +26,8 @@ Builder.load_string('''
     BoxLayout:
         id: commands
         orientation: 'horizontal'
+        spacing: 2
+        size_hint_y: None
         height: '48dp'
         Button:
             id: start
@@ -40,6 +40,11 @@ Builder.load_string('''
             size_hint_y: None
             height: '48dp'
             on_press: root.next()
+        Image:
+            source: 'images/speed-resized.jpg'
+            size_hint_x: None
+            height: '45dp'
+            width: '45dp'
         Slider:
             id: speed
             value: 2
@@ -50,6 +55,11 @@ Builder.load_string('''
             size_hint_y: None
             height: '48dp'
             on_value: root.update_speed()
+        Image:
+            source: 'images/zoom-resized.jpg'
+            size_hint_x: None
+            height: '45dp'
+            width: '45dp'
         Slider:
             id: zoom
             value: 12
