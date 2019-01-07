@@ -4,6 +4,7 @@ This is an implementation of **James Conway's Game of Life**. This game consists
 
 The game is implemented here as a Kivy Application.
 
+
 ## Rules of the Game of Life
 
 For a space that is *populated*:
